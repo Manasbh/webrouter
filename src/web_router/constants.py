@@ -561,10 +561,10 @@ for that request, not kept out of the chain.
 AUTO_APPENDED: tuple[str, ...] = _chain("search", "appended")
 """Keyed members the frozen results do not rank, tried after the keyless tier, with a credential, in joining order.
 
-From ``data/chains.json``, unmeasured: ``keenable``, ``deepseek``, ``agentcore``, ``valyu``, ``seltz`` and
-``octen`` joined after the scan that set the order, and the ranking set has no rows for them. A backend that joins
-later goes at the end of the file's ``appended``, so joining changes no environment's routing; ``make chains`` moves
-it ahead of the keyless tier only once frozen results rank it.
+From ``data/chains.json``, unmeasured: ``keenable``, ``deepseek``, ``agentcore``, ``valyu``, ``seltz``, ``octen`` and
+``keirolabs`` joined after the scan that set the order, and the ranking set has no rows for them. A backend that joins
+later goes at the end of the file's ``appended``, so joining changes no environment's routing; ``make chains`` moves it
+ahead of the keyless tier only once frozen results rank it.
 """
 
 AUTO_KEYLESS: tuple[tuple[str, dict[str, Any]], ...] = (
