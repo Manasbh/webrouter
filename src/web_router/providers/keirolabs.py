@@ -21,7 +21,9 @@ from web_router.constants_keirolabs import (
     KEIROLABS_SEARCH_NAMES,
     KEIROLABS_SEARCH_PARAMETERS,
     KEIROLABS_SEARCH_PATH,
+    MSG_KEIROLABS_NO_RESULTS,
 )
+from web_router.exceptions import ProviderError
 from web_router.providers._http import HttpSearchProvider
 from web_router.providers._utils import build_payload
 from web_router.types import SearchRequest, SearchResponse, SearchResult
@@ -56,10 +58,13 @@ class KeirolabsProvider(HttpSearchProvider):
         return build_payload(request, KEIROLABS_SEARCH_NAMES, query=request.query)
 
     def _to_response(self, request: SearchRequest, payload: dict[str, Any]) -> SearchResponse:
+        hits = payload.get("results")
+        if not isinstance(hits, list):
+            raise ProviderError(self.name, MSG_KEIROLABS_NO_RESULTS.format(fields=", ".join(sorted(payload)) or "none"))
         return SearchResponse(
             provider=self.name,
             query=request.query,
-            results=[self._to_result(hit) for hit in payload.get("results") or [] if hit.get("url")],
+            results=[self._to_result(hit) for hit in hits if hit.get("url")],
             raw=payload,
         )
 

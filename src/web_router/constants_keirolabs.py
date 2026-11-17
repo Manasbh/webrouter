@@ -23,3 +23,6 @@ never a page body, so ``search_depth`` and ``effort`` raise too.
 """
 
 KEIROLABS_SEARCH_NAMES = {"max_results": "maxResults"}
+
+MSG_KEIROLABS_NO_RESULTS = "Keirolabs answered without a results list (fields: {fields})"
+"""A 200 body with no ``results`` list is a reply this mapping cannot read, not a search that found nothing."""

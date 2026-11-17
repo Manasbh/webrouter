@@ -12,9 +12,9 @@ import os
 import httpx
 import pytest
 
-from web_router.exceptions import UnsupportedParameterError
+from web_router.exceptions import ProviderError, UnsupportedParameterError
 from web_router.providers.keirolabs import KeirolabsProvider
-from web_router.types import SearchRequest
+from web_router.types import SearchRequest, SearchResponse
 
 RECORDED = {
     "results": [
@@ -125,6 +125,24 @@ def test_a_score_that_is_not_a_finite_number_is_dropped(provider: KeirolabsProvi
     payload = {"results": [{"title": "T", "url": "https://e.com", "snippet": "s", "score": score}]}
     (result,) = provider._to_response(SearchRequest(query="q"), payload).results
     assert result.score is None
+
+
+def _search_answered_with(monkeypatch: pytest.MonkeyPatch, body: dict) -> SearchResponse:
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
+    provider = KeirolabsProvider(transport=httpx.MockTransport(lambda r: httpx.Response(200, json=body)))
+    return provider.search(SearchRequest(query="q"))
+
+
+@pytest.mark.parametrize("body", [{}, {"error": "quota exceeded"}, {"results": None}])
+def test_a_reply_without_a_results_list_is_an_error_not_an_empty_search(
+    monkeypatch: pytest.MonkeyPatch, body: dict
+) -> None:
+    with pytest.raises(ProviderError, match="results"):
+        _search_answered_with(monkeypatch, body)
+
+
+def test_an_empty_results_list_is_a_search_that_found_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
+    assert _search_answered_with(monkeypatch, {"results": []}).results == []
 
 
 @pytest.mark.integration
